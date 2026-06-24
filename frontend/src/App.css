@@ -15,6 +15,47 @@ section {
   margin-top: 32px;
 }
 
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+input,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font: inherit;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+button {
+  width: fit-content;
+  margin-right: 8px;
+  padding: 8px 12px;
+  border: 1px solid #222;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #f0f0f0;
+}
+
 pre {
   background: #f3f3f3;
   padding: 16px;
@@ -23,5 +64,5 @@ pre {
 }
 
 li {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }

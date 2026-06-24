@@ -6,7 +6,7 @@ const API_BASE_URL = "http://localhost:8000";
 function App() {
   const [health, setHealth] = useState(null);
   const [challenges, setChallenges] = useState([]);
-  const [title, setTitle] = useStatus("");
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
@@ -161,9 +161,16 @@ function App() {
               placeholder="챌린지 설명을 입력하세요."
             />
           </div>
-          {/* 0623 23:30 작업 종료 */}
+          {/* 0623 23:30 작업 종료 | 0624 19:25 작업 재시작 */}
+          <button type="submit">
+            {editingId ? "수정하기" : "생성하기"}
+          </button>
+          {editingId && (
+            <button type="button" onClick={handleCancelEdit}>
+              취소
+            </button>
+          )}
         </form>
-
       </section>
       
       <section>
@@ -177,6 +184,14 @@ function App() {
               <li key={challenge.id}>
                 <strong>{challenge.title}</strong>
                 <p>{challenge.description}</p>
+
+                <button type="button" onClick={() => handleEdit(challenge)}>
+                  수정
+                </button>
+
+                <button type="button" onClick={() => handleDelete(challenge.id)}>
+                  삭제
+                </button>
               </li>
             ))}
           </ul>
