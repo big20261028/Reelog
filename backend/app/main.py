@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database import Base, engine
+from app.models import challenge # 아무것도 안하는 것 같지만, 이게 있어야 SQLAlchemy가 모델 인식하고 테이블 생성.
 from app.routers import challenges
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Reelog API",
