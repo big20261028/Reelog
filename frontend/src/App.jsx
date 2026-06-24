@@ -122,7 +122,7 @@ function App() {
 
 
   return (
-    <main style={{ maxWidth: "720px", margin: "40px auto", padding: "0 20px" }}>
+    <main>
       <h1>Reelog</h1>
       <p>루틴 인증 기반 숏폼 기록 서비스</p>
 
@@ -201,7 +201,7 @@ function App() {
       {error && (
         <section>
           <h2>에러</h2>
-          <p style={{color: "red"}}>{error}</p>
+          <p className="error-message">{error}</p>
         </section>
       )}
     </main>
