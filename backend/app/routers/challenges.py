@@ -1,5 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
+from app.database import get_db
+from app.models.challenge import Challenge
 from app.schemas.challenge import (
     ChallengeCreate,
     ChallengeUpdate,
@@ -11,25 +14,9 @@ router = APIRouter(
     tags=["Challenges"],
 )
 
-# DB를 붙이기 전까지 사용할 임시 메모리 저장소
-challenges: list[dict] = [
-    {
-        "id": 1,
-        "title": "아침 루틴 인증",
-        "description": "기상, 물 마시기, 스트레칭을 인증하는 루틴",
-    },
-    {
-        "id": 2,
-        "title": "취준 루틴 인증",
-        "description": "알고리즘, 프로젝트, CS 공부를 인증하는 루틴",
-    },
-]
-
-next_challenge_id = 3
-
-
 @router.get("", response_model=list[ChallengeResponse])
-def get_challenges():
+def get_challenges(db: Session = Depends(get_db)):
+    challenges = db.query(Challenge).all()
     return challenges
 
 @router.post(
@@ -37,54 +24,90 @@ def get_challenges():
     response_model=ChallengeResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_challenge(payload: ChallengeCreate):
-    global next_challenge_id
+def create_challenge(
+    payload: ChallengeCreate,
+    db: Session = Depends(get_db)
+    ):
+    challenge = Challenge(
+        title=payload.title,
+        description=payload.description,
+    )
 
-    challenge = {
-        "id" : next_challenge_id,
-        "title": payload.title,
-        "description": payload.description,
-    }
-
-    challenges.append(challenge)
-    next_challenge_id += 1
+    db.add(challenge)
+    db.commit()
+    db.refresh(challenge)
 
     return challenge
 
 @router.get("/{challenge_id}", response_model=ChallengeResponse)
-def get_challenge(challenge_id: int):
-    for challenge in challenges:
-        if challenge["id"] == challenge_id:
-            return challenge
-        
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail='챌린지를 찾을 수 없습니다.'
+def get_challenge(
+    challenge_id: int,
+    db: Session = Depends(get_db)
+    ):
+    
+    challenge = (
+        db.query(Challenge)
+        .filter(Challenge.id == challenge_id)
+        .first()
     )
+    
+    if challenge is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='챌린지를 찾을 수 없습니다.'
+        )
+    
+    return challenge
 
 @router.patch("/{challenge_id}", response_model=ChallengeResponse)
-def update_challenge(challenge_id: int, payload: ChallengeUpdate):
+def update_challenge(
+    challenge_id: int, 
+    payload: ChallengeUpdate,
+    db: Session = Depends(get_db)
+    ):
+
+    challenge = (
+        db.query(Challenge)
+        .filter(Challenge.id == challenge_id)
+        .first()
+    )
+   
+    if challenge is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="챌린지를 찾을 수 없습니다.",
+        )
+    
     update_data = payload.model_dump(exclude_unset=True)
 
-    for challenge in challenges:
-        if challenge["id"] == challenge_id:
-            challenge.update(update_data)
-            return challenge
+    for key, value in update_data.items():
+        setattr(challenge, key, value)
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="챌린지를 찾을 수 없습니다.",
-    )
+    db.commit()
+    db.refresh(challenge)
+
+    return challenge
 
 
 @router.delete("/{challenge_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_challenge(challenge_id: int):
-    for index, challenge in enumerate(challenges):
-        if challenge["id"] == challenge_id:
-            challenges.pop(index) # 비효율
-            return
+def delete_challenge(
+    challenge_id: int,
+    db: Session = Depends(get_db)
+    ):
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="챌린지를 찾을 수 없습니다.",
+    challenge = (
+        db.query(Challenge).filter(Challenge.id == challenge_id).first()
     )
+
+    if challenge is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="챌린지를 찾을 수 없습니다.",
+        )
+
+    db.delete(challenge)
+    db.commit()
+
+    return None
+
+    

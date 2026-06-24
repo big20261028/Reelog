@@ -21,3 +21,8 @@ Thumbs.db
 
 # Uploads / local files
 uploads/
+
+# Local database
+*.db
+*.sqlite
+*.sqlite3
