@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "./App.css"
 
+import RoutineManager from "./components/RoutineManager";
+
 const API_BASE_URL = "http://localhost:8000";
 
 function App() {
@@ -204,6 +206,8 @@ function App() {
           <p className="error-message">{error}</p>
         </section>
       )}
+
+      <RoutineManager />
     </main>
   );
 }
