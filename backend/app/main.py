@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.models import challenge, routine # 아무것도 안하는 것 같지만, 이게 있어야 SQLAlchemy가 모델 인식하고 테이블 생성.
-from app.routers import challenges, routines
+from app.models import challenge, routine, daily_routine # 아무것도 안하는 것 같지만, 이게 있어야 SQLAlchemy가 모델 인식하고 테이블 생성.
+from app.routers import challenges, routines, daily_routines
 
 Base.metadata.create_all(bind=engine)
 
@@ -29,6 +29,8 @@ app.add_middleware(
 
 app.include_router(challenges.router)
 app.include_router(routines.router)
+app.include_router(daily_routines.router)
+app.include_router(daily_routines.item_router)
 
 @app.get("/")
 def root():
