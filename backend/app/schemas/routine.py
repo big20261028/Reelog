@@ -21,7 +21,7 @@ class RoutineCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=100)
     description: str | None = Field(default=None, max_length=500)
     sequence: int = Field(default=1, ge=1)
-    items: list[RoutineItemResponse] = Field(default_factory=list)
+    items: list[RoutineItemCreate] = Field(default_factory=list)
 
 
 class RoutineUpdate(BaseModel):
