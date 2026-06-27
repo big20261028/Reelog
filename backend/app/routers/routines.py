@@ -19,6 +19,9 @@ router = APIRouter(
 @router.get("", response_model=list[RoutineResponse])
 def get_routines(db: Session = Depends(get_db)):
     routines = db.query(Routine).all()
+
+    print("GET /api/v1/routines ids:", [routine.id for routine in routines])
+    
     return routines
 
 @router.post(
