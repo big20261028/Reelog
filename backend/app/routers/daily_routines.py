@@ -22,7 +22,7 @@ router = APIRouter(
 
 item_router = APIRouter(
     prefix="/api/v1/daily-routine-items",
-    tags=["Daily Routine Itmes"],
+    tags=["Daily Routine Items"],
 )
 
 def update_daily_routine_status(daily_routines: DailyRoutine):
@@ -120,7 +120,7 @@ def get_today_daily_routines(db: Session = Depends(get_db)):
     
     return daily_routines
 
-@router.get("/{daily_routine_id}", response_model=DailyRoutineItemResponse)
+@router.get("/{daily_routine_id}", response_model=DailyRoutineResponse)
 def get_daily_routine(
     daily_routine_id: int,
     db: Session = Depends(get_db)
@@ -190,7 +190,7 @@ def cancel_daily_routine_item(
         )
 
     item.is_completed = False
-    item.completed_at = datetime.now()
+    item.completed_at = None
 
     update_daily_routine_status(item.daily_routine)
 
