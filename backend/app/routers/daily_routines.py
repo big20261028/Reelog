@@ -43,7 +43,7 @@ def update_daily_routine_status(daily_routines: DailyRoutine):
         
         
 @router.post(
-    "from-routine/{routine_id}",
+    "/from-routine/{routine_id}",
     response_model=DailyRoutineResponse,
     status_code=status.HTTP_201_CREATED
 )
