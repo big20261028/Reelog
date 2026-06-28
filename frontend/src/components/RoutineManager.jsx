@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 
 const API_BASE_URL = "http://localhost:8000";
 
-function RoutineManager(){
-  const [routines, setRoutines] = useState([]);
+function RoutineManager({routines, onRoutinesChanged}){
+  // const [routines, setRoutines] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -12,36 +12,59 @@ function RoutineManager(){
   const [itemDescription, setItemDescription] = useState("");
   const [selectedRoutineId, setSelectedRoutineId] = useState("");
 
+  // const [selectedRoutine, setSelectedRoutine] = useState("");
+
   const [error, setError] = useState("");
 
-  async function fetchRoutines() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/routines`);
+  
+  const selectedRoutine = routines.find(
+    (routine) => String(routine.id) === String(selectedRoutineId)
+  )
 
-      if (!response.ok){
-        throw new Error("루틴 목록을 불러오지 못했습니다.");
-      }
+  // async function fetchRoutines() {
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/api/v1/routines`);
 
-      const data = await response.json();
-      setRoutines(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  }
+  //     if (!response.ok){
+  //       throw new Error("루틴 목록을 불러오지 못했습니다.");
+  //     }
+
+  //     const data = await response.json();
+  //     setRoutines(data);
+  //   } catch (err) {
+  //     setError(err.message);
+  //   }
+  // }
 
   useEffect(() => {
-    fetchRoutines();
-  }, []);
+    // await onRoutinesChanged();
+    if (!selectedRoutineId) {
+      return;
+    }
+
+    const exists = routines.some(
+      (routine) => String(routine.id) === String(selectedRoutineId)
+    );
+
+    if (!exists) {
+      setSelectedRoutineId("");
+    }
+  }, [routines, selectedRoutineId]);
 
   async function handleSubmit(event){
     event.preventDefault();
     setError("");
 
-    const payload = {
-      title,
-      description,
-      items: [],
-    };
+    const payload = editingId
+      ? {
+          title,
+          description,
+        }
+      : {
+          title,
+          description,
+          items: [],
+        };  
 
     try{
       const url = editingId
@@ -66,7 +89,8 @@ function RoutineManager(){
       setDescription("");
       setEditingId(null);
 
-      fetchRoutines(); // 루틴 목록 다시 받아와서 갱신하기
+      // fetchRoutines(); // 루틴 목록 다시 받아와서 갱신하기
+      await onRoutinesChanged();
     } catch (err){
       setError(err.message);
     }
@@ -100,7 +124,8 @@ function RoutineManager(){
         throw new Error("루틴 삭제에 실패했습니다.");
       }
 
-      fetchRoutines();
+      // fetchRoutines();
+      await onRoutinesChanged();
     }catch(err){
       setError(err.message);
     }
@@ -115,10 +140,23 @@ function RoutineManager(){
       return;
     }
 
+    if (!selectedRoutine) {
+      setError("선택한 루틴을 찾을 수 없습니다. 목록을 새로고침해 주세요.");
+      setSelectedRoutineId("");
+      return;
+    }
+
+    const items = selectedRoutine.items ?? [];
+
+    const nextSequence =
+      items.length > 0
+        ? Math.max(...items.map((item) => item.sequence)) + 1
+        : 1;
+
     const payload = {
       title: itemTitle,
       description: itemDescription,
-      sequence: 1,
+      sequence: nextSequence,
     }
 
     try{
@@ -140,7 +178,8 @@ function RoutineManager(){
       setItemTitle("");
       setItemDescription("");
 
-      fetchRoutines();
+      // fetchRoutines();
+      await onRoutinesChanged();
     }catch(err){
       setError(err.message);
     }
@@ -165,7 +204,8 @@ function RoutineManager(){
         throw new Error("루틴 항목 삭제에 실패했습니다.");
       }
 
-      fetchRoutines();
+      // fetchRoutines();
+      await onRoutinesChanged();
     } catch(err){
       setError(err.message);
     }
