@@ -63,3 +63,9 @@ class DailyRoutineItem(Base):
         "DailyRoutine",
         back_populates="items"
     )
+
+    proofs = relationship(
+        "Proof",
+        back_populates="daily_routine_item",
+        cascade="all, delete-orphan"
+    )
