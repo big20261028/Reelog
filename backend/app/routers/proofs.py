@@ -143,16 +143,16 @@ def delete_proof(
     if proof is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            datail="인증 기록을 찾을 수 없습니다."
+            detail="인증 기록을 찾을 수 없습니다."
         )
     
     media_asset = proof.media_asset
+    file_path = BASE_DIR / media_asset.file_path
 
     db.delete(proof)
     db.delete(media_asset)
     db.commit()
 
-    file_path = BASE_DIR / media_asset.file_path
 
     if file_path.exists():
         file_path.unlink()
