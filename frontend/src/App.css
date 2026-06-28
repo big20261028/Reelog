@@ -207,3 +207,50 @@ select:focus {
     flex-direction: column;
   }
 }
+
+.daily-routine-list {
+  margin-top: 28px;
+}
+
+.daily-routine-card {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+}
+
+.daily-routine-meta {
+  margin-top: 8px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.completed-item {
+  background: #ecfdf5;
+  border-color: #86efac;
+}
+
+.completed-item strong {
+  color: #166534;
+}
+
+.app-nav {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+
+.app-nav a {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #0f172a;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.app-nav a:hover {
+  background: #cbd5e1;
+}
