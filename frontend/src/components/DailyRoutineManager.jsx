@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import ProofManager from "./ProofManager";
+
 const API_BASE_URL = "http://localhost:8000";
 
 function DailyRoutineManager({ routines, onRoutinesChanged }){
@@ -254,6 +256,8 @@ function DailyRoutineManager({ routines, onRoutinesChanged }){
                                                             완료 처리
                                                         </button>
                                                     )}
+
+                                                    <ProofManager itemId={item.id} />
                                                 </li>
                                             ))}
                                         </ul>
