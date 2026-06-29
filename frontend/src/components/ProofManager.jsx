@@ -21,7 +21,7 @@ function ProofManager({ itemId } ){
             const data = await response.json();
             setProofs(data);
         } catch (err){
-            serError(err.message);
+            setError(err.message);
         }
     }
 
@@ -171,7 +171,7 @@ function ProofManager({ itemId } ){
                                 )}
                                 
                                 <div>
-                                    <a href={fileUrl} target="_blank" rel="noteferrer">
+                                    <a href={fileUrl} target="_blank" rel="noreferrer">
                                         파일 열기
                                     </a>
                                     <button
