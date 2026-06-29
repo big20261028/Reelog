@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
 from app.database import Base, engine
-from app.models import challenge, routine, daily_routine, proof # 아무것도 안하는 것 같지만, 이게 있어야 SQLAlchemy가 모델 인식하고 테이블 생성.
-from app.routers import challenges, routines, daily_routines, proofs
+from app.models import challenge, routine, daily_routine, proof, render_job # 아무것도 안하는 것 같지만, 이게 있어야 SQLAlchemy가 모델 인식하고 테이블 생성.
+from app.routers import challenges, routines, daily_routines, proofs, render_jobs
 
 from fastapi.staticfiles import StaticFiles
 
@@ -42,6 +42,7 @@ app.include_router(routines.router)
 app.include_router(daily_routines.router)
 app.include_router(daily_routines.item_router)
 app.include_router(proofs.router)
+app.include_router(render_jobs.router)
 
 @app.get("/")
 def root():
