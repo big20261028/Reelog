@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -9,6 +9,8 @@ from app.database import get_db
 from app.models.daily_routine import DailyRoutineItem
 from app.models.proof import MediaAsset, Proof
 from app.schemas.proof import ProofResponse
+
+from app.routers.daily_routines import update_daily_routine_status
 
 router = APIRouter(
     tags=["Proofs"]
@@ -25,6 +27,8 @@ ALLOWED_CONTENT_TYPES ={
     "video/quicktime",
 }
 
+# 한 item당 업로드 가능한 콘텐츠 개수
+MAX_PROOFS_PER_ITEM = 5
 
 @router.post(
     "/api/v1/daily-routine-items/{item_id}/proofs",
@@ -47,6 +51,18 @@ async def create_proof(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="데일리 루틴 항목을 찾을 수 없습니다.",
+        )
+    
+    current_proof_count = (
+        db.query(Proof)
+        .filter(Proof.daily_routine_item_id == item_id)
+        .count()
+    )
+
+    if current_proof_count >= MAX_PROOFS_PER_ITEM:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"이 루틴 항목에는 인증 파일을 최대 {MAX_PROOFS_PER_ITEM}개까지만 등록할 수 있습니다.",
         )
     
     if file.content_type not in ALLOWED_CONTENT_TYPES:
@@ -91,6 +107,13 @@ async def create_proof(
         note=note,
     )
 
+    daily_routine_item.is_completed = True
+    
+    if daily_routine_item.completed_at is None:
+        daily_routine_item.completed_at = datetime.now()
+
+    update_daily_routine_status(daily_routine_item.daily_routine)
+
     db.add(proof)
     db.commit()
     db.refresh(proof)
@@ -120,7 +143,7 @@ def get_proofs_by_routine_item(
     proofs = (
         db.query(Proof)
         .filter(Proof.daily_routine_item_id == item_id)
-        .order_by(Proof.id.desc())
+        # .order_by(Proof.created_at.desc())
         .all()
     )
 
@@ -146,13 +169,33 @@ def delete_proof(
             detail="인증 기록을 찾을 수 없습니다."
         )
     
+    daily_routine_item = proof.daily_routine_item
+
     media_asset = proof.media_asset
     file_path = BASE_DIR / media_asset.file_path
 
     db.delete(proof)
     db.delete(media_asset)
-    db.commit()
+    db.flush()
 
+    oldest_remaining_proof = (
+        db.query(Proof)
+        .filter(Proof.daily_routine_item_id == daily_routine_item.id)
+        .order_by(Proof.created_at.asc(), Proof.id.asc())
+        .first()
+    )
+
+    if oldest_remaining_proof is None:
+        daily_routine_item.is_completed = False
+        daily_routine_item.completed_at = None
+    else:
+        # 남은 proof중 가장 오래된 created_at 가져와서 등록하기
+        daily_routine_item.is_completed = True
+        daily_routine_item.completed_at = oldest_remaining_proof.created_at
+    
+    update_daily_routine_status(daily_routine_item.daily_routine)
+    
+    db.commit()
 
     if file_path.exists():
         file_path.unlink()

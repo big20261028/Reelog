@@ -257,7 +257,10 @@ function DailyRoutineManager({ routines, onRoutinesChanged }){
                                                         </button>
                                                     )}
 
-                                                    <ProofManager itemId={item.id} />
+                                                    <ProofManager 
+                                                        itemId={item.id}
+                                                        onProofsChanged={fetchTodayDailyRoutines}
+                                                    />
                                                 </li>
                                             ))}
                                         </ul>
