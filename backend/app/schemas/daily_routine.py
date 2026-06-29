@@ -12,6 +12,8 @@ class DailyRoutineItemResponse(BaseModel):
     is_completed: bool
     completed_at: datetime | None = None
     
+    proof_count: int = 0
+
     model_config = {
         "from_attributes":True
     }
