@@ -247,14 +247,30 @@ function DailyRoutineManager({ routines, onRoutinesChanged }){
                                                         {item.is_completed ? "완료" : "미완료"}
                                                     </p>
 
+                                                    <p>
+                                                        인증 자료 : {item.proof_count ?? 0}개
+                                                    </p>
+
                                                     {item.completed_at && (
                                                         <p>완료 시간: {item.completed_at}</p>
                                                     )}
 
                                                     {item.is_completed ? (
-                                                        <button type="button" onClick={() => handleCancelItem(item.id)}>
-                                                            완료 취소
-                                                        </button>
+                                                        <>
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={() => handleCancelItem(item.id)}
+                                                                disabled={(item.proof_count ?? 0) > 0}
+                                                            >
+                                                                완료 취소
+                                                            </button>
+
+                                                            {(item.proof_count ?? 0) > 0 && (
+                                                                <p className="routine-policy-message">
+                                                                    인증 파일이 있는 항목은 인증 삭제를 통해 미완료로 변경할 수  있습니다.
+                                                                </p>
+                                                            )}
+                                                        </>
                                                     ) : (
                                                         <button type="button" onClick={() => handleCompleteItem(item.id)}>
                                                             완료 처리

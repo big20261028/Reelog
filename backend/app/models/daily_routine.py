@@ -35,7 +35,7 @@ class DailyRoutine(Base):
     
 class DailyRoutineItem(Base):
     __tablename__ = "daily_routine_items"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     
     daily_routine_id = Column(
@@ -69,3 +69,7 @@ class DailyRoutineItem(Base):
         back_populates="daily_routine_item",
         cascade="all, delete-orphan"
     )
+
+    @property
+    def proof_count(self):
+        return len(self.proofs)
