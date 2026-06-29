@@ -76,7 +76,7 @@ async def create_proof(
     relative_path = save_path.relative_to(BASE_DIR)
     file_url = f"/uploads/proofs/{date.today().isoformat()}/{stored_filename}"
 
-    medial_asset = MediaAsset(
+    media_asset = MediaAsset(
         original_filename=original_filename,
         stored_filename=stored_filename,
         file_path=str(relative_path),
@@ -87,7 +87,7 @@ async def create_proof(
 
     proof = Proof(
         daily_routine_item_id=item_id,
-        media_asset=medial_asset,
+        media_asset=media_asset,
         note=note,
     )
 
