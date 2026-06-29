@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "../constants/api";
 
-function ProofManager({ itemId } ){
+function ProofManager({ itemId, onProofsChanged } ){
     const [proofs, setProofs] = useState([]);
     const [file, setFile] = useState(null);
     const [note, setNote] = useState("");
     const [error, setError] = useState("");
     const [isUploading, setIsUploading] = useState(false);
+
+    // 최대 업로드 파일 개수
+    const MAX_PROOFS_PER_ITEM = 5;
+
+    // action 때마다 재설정 되도록 밖에다 선언
+    const proofCount = proofs.length;
+    const isMaxProofCount = proofCount >= MAX_PROOFS_PER_ITEM;
 
     async function fetchProofs() {
         try{
@@ -54,7 +61,11 @@ function ProofManager({ itemId } ){
             );
 
             if (!response.ok){
-                throw new Error("인증 파일 업로드에 실패했습니다.");
+                const errorData = await response.json().catch(() => null)
+
+                throw new Error(
+                    errorData?.detail ?? "인증 파일 업로드에 실패했습니다."
+                );
             }
 
             setFile(null);
@@ -66,6 +77,10 @@ function ProofManager({ itemId } ){
             }
 
             await fetchProofs();
+
+            if (onProofsChanged){
+                await onProofsChanged();
+            }
         } catch(err){
             setError(err.message);
         } finally {
@@ -91,6 +106,9 @@ function ProofManager({ itemId } ){
             }
 
             await fetchProofs();
+            if (onProofsChanged){
+                await onProofsChanged();
+            }
         } catch(err){
             setError(err.message);
         }
@@ -101,9 +119,20 @@ function ProofManager({ itemId } ){
     }
 
 
+
+
     return (
         <div className="proof-manager">
             <h4>인증 파일</h4>
+
+            <p>
+                인증 자료: {proofCount} / {MAX_PROOFS_PER_ITEM}
+            </p>
+            {isMaxProofCount && (
+                <p className="error-message">
+                    인증 파일은 최대 {MAX_PROOFS_PER_ITEM}개까지만 등록할 수 있습니다.
+                </p>
+            )}
 
             <form onSubmit={handleUpload} className="proof-upload-form">
                 <div>
@@ -112,6 +141,7 @@ function ProofManager({ itemId } ){
                         type="file"
                         id={`proof-file-${itemId}`}
                         accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+                        disabled={isMaxProofCount ? true : false}
                         onChange={(event) => setFile(event.target.files[0] ?? null)}
                     />
                 </div>
@@ -122,13 +152,16 @@ function ProofManager({ itemId } ){
                         type="text"
                         id={`proof-note-${itemId}`}
                         value={note}
+                        disabled={isMaxProofCount ? true : false}
                         onChange={(event) => setNote(event.target.value)}
                         placeholder="예: 알고리즘 풀이 완료"
                     />
                 </div>
 
-                <button type="submit" disabled={isUploading}>
-                    {isUploading ? "업로드 중..." : "인증 업로드"}
+                <button type="submit" disabled={isUploading || isMaxProofCount}>
+                    {
+                        isMaxProofCount ? ("업로드 불가") : (isUploading ? "업로드 중..." : "인증 업로드")
+                    }
                 </button>
             </form>
 
@@ -136,7 +169,7 @@ function ProofManager({ itemId } ){
                 <p>등록된 인증 파일이 없습니다.</p>
             ) : (
                 <ul className="proof-list">
-                    {proofs.map((proof) => {
+                    {proofs.map((proof, index) => {
                         const media = proof.media_asset;
                         const fileUrl = getFileUrl(media.file_url);
                         const isImage = media.content_type.startsWith("image/");
@@ -188,6 +221,7 @@ function ProofManager({ itemId } ){
             )}
 
             {error && <p className="error-message">{error}</p>}
+            
         </div>
     );
 }
