@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.daily_routine import DailyRoutine, DailyRoutineItem
 from app.models.routine import Routine
+from app.models.proof import Proof
 from app.schemas.daily_routine import (
     DailyRoutineItemResponse,
     DailyRoutineResponse,
@@ -188,6 +189,18 @@ def cancel_daily_routine_item(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="데일리 루틴 항목을 찾을 수 없습니다.",
         )
+
+    existing_proof_count = (
+        db.query(Proof)
+        .filter(Proof.daily_routine_item_id == item.id)
+        .count()
+    )
+
+    if existing_proof_count > 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="인증 파일이 있는 항목은 완료 취소할 수 없습니다. 인증 파일을 먼저 삭제하세요."
+        ) 
 
     item.is_completed = False
     item.completed_at = None

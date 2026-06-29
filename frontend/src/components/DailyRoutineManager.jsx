@@ -139,7 +139,11 @@ function DailyRoutineManager({ routines, onRoutinesChanged }){
             );
 
             if(!response.ok){
-                throw new Error("루틴 항목 완료 취소에 실패했습니다.")
+                const errorData = await response.json().catch(() => null)
+
+                throw new Error(
+                    errorData?.detail ?? "루틴 항목 완료 취소에 실패했습니다."
+                );
             }
 
             fetchTodayDailyRoutines();
