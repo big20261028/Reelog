@@ -107,9 +107,10 @@ async def create_proof(
         note=note,
     )
 
+    # 루틴 영상 올리면 True로 변경
     daily_routine_item.is_completed = True
     
-    if daily_routine_item.completed_at is None:
+    if daily_routine_item.completed_at is None: # 기입 안되어 있으면 갱신
         daily_routine_item.completed_at = datetime.now()
 
     update_daily_routine_status(daily_routine_item.daily_routine)
@@ -143,7 +144,7 @@ def get_proofs_by_routine_item(
     proofs = (
         db.query(Proof)
         .filter(Proof.daily_routine_item_id == item_id)
-        # .order_by(Proof.created_at.desc())
+        .order_by(Proof.created_at, Proof.id)
         .all()
     )
 
